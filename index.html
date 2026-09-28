@@ -1,0 +1,865 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>KEY VAULT — Key Generator</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body{
+  font-family:Arial,Helvetica,sans-serif;
+  min-height:100vh;
+  color:#fff;
+  background:
+    radial-gradient(circle at top left,#182b40 0,#080b12 42%),
+    #080b12;
+}
+
+.container{
+  width:min(1100px,94%);
+  margin:25px auto;
+}
+
+.card{
+  background:rgba(15,21,32,.92);
+  border:1px solid #273247;
+  border-radius:20px;
+  padding:22px;
+  margin-bottom:18px;
+  box-shadow:0 15px 50px rgba(0,0,0,.35);
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.logo{
+  font-size:25px;
+  font-weight:900;
+  letter-spacing:2px;
+}
+
+.logo span{
+  color:#65e6bd;
+}
+
+.badge{
+  padding:7px 12px;
+  border-radius:20px;
+  background:#10291f;
+  color:#65e6bd;
+  font-size:12px;
+}
+
+h2{
+  font-size:19px;
+  margin-bottom:18px;
+}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  margin-bottom:18px;
+}
+
+.stat{
+  padding:18px;
+  border-radius:16px;
+  background:#101722;
+  border:1px solid #263145;
+}
+
+.stat b{
+  display:block;
+  font-size:27px;
+  margin-bottom:5px;
+}
+
+.stat span{
+  color:#8995a8;
+  font-size:12px;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1.3fr 1fr .7fr 1fr;
+  gap:12px;
+  align-items:end;
+}
+
+label{
+  color:#9ca8b9;
+  font-size:13px;
+}
+
+input,select,button{
+  width:100%;
+  padding:13px;
+  margin-top:7px;
+  border-radius:11px;
+  border:1px solid #303b50;
+  background:#0a1019;
+  color:#fff;
+  font-size:14px;
+  outline:none;
+}
+
+input:focus,select:focus{
+  border-color:#65e6bd;
+}
+
+button{
+  border:0;
+  background:#65e6bd;
+  color:#06100d;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+button:hover{
+  filter:brightness(1.08);
+}
+
+.generated{
+  margin-top:18px;
+  padding:15px;
+  border-radius:14px;
+  background:#0b1c18;
+  border:1px solid #285e50;
+}
+
+.generated small{
+  color:#8ea79f;
+}
+
+.keybox{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+}
+
+.keybox code{
+  flex:1;
+  overflow:auto;
+  white-space:nowrap;
+  padding:13px;
+  background:#070c12;
+  border-radius:10px;
+  color:#65e6bd;
+}
+
+.keybox button{
+  width:auto;
+  padding:0 18px;
+}
+
+.table-top{
+  display:flex;
+  justify-content:space-between;
+  gap:15px;
+  align-items:center;
+}
+
+.search{
+  max-width:270px;
+  margin-top:0;
+}
+
+.table-wrap{
+  overflow-x:auto;
+  margin-top:15px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  min-width:800px;
+}
+
+th,td{
+  text-align:left;
+  padding:13px 10px;
+  border-bottom:1px solid #20293a;
+  font-size:13px;
+}
+
+th{
+  color:#7e8a9d;
+}
+
+.status{
+  display:inline-block;
+  padding:5px 9px;
+  border-radius:20px;
+  background:#14271f;
+  color:#65e6bd;
+  font-size:11px;
+}
+
+.status.revoked{
+  background:#351820;
+  color:#ff9aa5;
+}
+
+.status.expired{
+  background:#322b17;
+  color:#ffc969;
+}
+
+.revoke{
+  width:auto;
+  margin:0;
+  padding:8px 11px;
+  background:#3a1820;
+  color:#ffabb4;
+}
+
+.empty{
+  text-align:center;
+  padding:30px;
+  color:#778399;
+}
+
+@media(max-width:750px){
+  .stats{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .form-grid{
+    grid-template-columns:1fr;
+  }
+
+  .header{
+    align-items:flex-start;
+  }
+
+  .table-top{
+    flex-direction:column;
+    align-items:stretch;
+  }
+
+  .search{
+    max-width:none;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <div class="header">
+    <div>
+      <div class="logo">KEY<span>VAULT</span></div>
+      <small style="color:#8995a8">
+        License Key Generator
+      </small>
+    </div>
+
+    <div class="badge">● SYSTEM ONLINE</div>
+  </div>
+
+  <div class="stats">
+
+    <div class="stat">
+      <b id="total">0</b>
+      <span>Total Keys</span>
+    </div>
+
+    <div class="stat">
+      <b id="active">0</b>
+      <span>Active</span>
+    </div>
+
+    <div class="stat">
+      <b id="revoked">0</b>
+      <span>Revoked</span>
+    </div>
+
+    <div class="stat">
+      <b id="expired">0</b>
+      <span>Expired</span>
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <h2>🔑 Generate License Key</h2>
+
+    <div class="form-grid">
+
+      <label>
+        Plan
+        <input id="plan" value="Premium" maxlength="40">
+      </label>
+
+      <label>
+        Duration
+        <select id="duration">
+          <option value="1">1 Day</option>
+          <option value="7">7 Days</option>
+          <option value="30" selected>30 Days</option>
+          <option value="90">90 Days</option>
+          <option value="365">1 Year</option>
+          <option value="0">Lifetime</option>
+        </select>
+      </label>
+
+      <label>
+        Devices
+        <input id="devices" type="number" value="1" min="1" max="100">
+      </label>
+
+      <button onclick="generateKey()">
+        GENERATE KEY
+      </button>
+
+    </div>
+
+
+    <div id="generated" class="generated" style="display:none">
+
+      <small>New generated key</small>
+
+      <div class="keybox">
+
+        <code id="newKey"></code>
+
+        <button onclick="copyKey()">
+          COPY
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <div class="card">
+
+    <div class="table-top">
+
+      <h2>Generated Keys</h2>
+
+      <input
+        class="search"
+        id="search"
+        placeholder="Search key / plan / status..."
+        oninput="renderKeys()"
+      >
+
+    </div>
+
+
+    <div class="table-wrap">
+
+      <table>
+
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Key</th>
+            <th>Plan</th>
+            <th>Expiry</th>
+            <th>Devices</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+
+        <tbody id="keyList"></tbody>
+
+      </table>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<script>
+
+let keys = JSON.parse(
+  localStorage.getItem("KEY_VAULT_KEYS") || "[]"
+);
+
+
+/* =========================
+   KEY GENERATOR
+========================= */
+
+function randomPart(length){
+
+  const chars =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  let result = "";
+
+  for(let i=0;i<length;i++){
+
+    result +=
+      chars.charAt(
+        Math.floor(Math.random()*chars.length)
+      );
+
+  }
+
+  return result;
+}
+
+
+function generateKey(){
+
+  const plan =
+    document.getElementById("plan").value.trim()
+    || "Premium";
+
+  const duration =
+    Number(document.getElementById("duration").value);
+
+  const devices =
+    Number(document.getElementById("devices").value);
+
+
+  if(devices < 1 || devices > 100){
+
+    alert("Device limit must be between 1 and 100.");
+
+    return;
+  }
+
+
+  const key =
+    "LIC-" +
+    randomPart(5) + "-" +
+    randomPart(5) + "-" +
+    randomPart(5) + "-" +
+    randomPart(5) + "-" +
+    randomPart(5);
+
+
+  let expiry = null;
+
+  if(duration > 0){
+
+    expiry =
+      Date.now() +
+      duration * 24 * 60 * 60 * 1000;
+
+  }
+
+
+  const item = {
+
+    id: Date.now(),
+
+    key:key,
+
+    plan:plan,
+
+    expiry:expiry,
+
+    devices:devices,
+
+    status:"active",
+
+    created:Date.now()
+
+  };
+
+
+  keys.unshift(item);
+
+  saveKeys();
+
+  document.getElementById("newKey").textContent = key;
+
+  document.getElementById("generated").style.display =
+    "block";
+
+  renderKeys();
+
+}
+
+
+/* =========================
+   SAVE
+========================= */
+
+function saveKeys(){
+
+  localStorage.setItem(
+    "KEY_VAULT_KEYS",
+    JSON.stringify(keys)
+  );
+
+}
+
+
+/* =========================
+   EXPIRY
+========================= */
+
+function updateExpired(){
+
+  let changed = false;
+
+  keys.forEach(k => {
+
+    if(
+      k.status === "active" &&
+      k.expiry &&
+      Date.now() >= k.expiry
+    ){
+
+      k.status = "expired";
+
+      changed = true;
+
+    }
+
+  });
+
+  if(changed){
+
+    saveKeys();
+
+  }
+
+}
+
+
+/* =========================
+   RENDER
+========================= */
+
+function renderKeys(){
+
+  updateExpired();
+
+  const search =
+    document
+      .getElementById("search")
+      .value
+      .toLowerCase();
+
+
+  const list =
+    keys.filter(k => {
+
+      return (
+        k.key.toLowerCase().includes(search) ||
+        k.plan.toLowerCase().includes(search) ||
+        k.status.toLowerCase().includes(search)
+      );
+
+    });
+
+
+  const tbody =
+    document.getElementById("keyList");
+
+
+  if(list.length === 0){
+
+    tbody.innerHTML =
+      `<tr>
+        <td colspan="7" class="empty">
+          No keys found
+        </td>
+      </tr>`;
+
+  }else{
+
+    tbody.innerHTML =
+      list.map(k => `
+
+        <tr>
+
+          <td>${k.id}</td>
+
+          <td>
+            <code>${escapeHTML(k.key)}</code>
+          </td>
+
+          <td>
+            ${escapeHTML(k.plan)}
+          </td>
+
+          <td>
+            ${formatExpiry(k.expiry)}
+          </td>
+
+          <td>
+            ${k.devices}
+          </td>
+
+          <td>
+            <span class="status ${k.status}">
+              ${k.status.toUpperCase()}
+            </span>
+          </td>
+
+          <td>
+
+            ${
+              k.status === "active"
+
+              ?
+
+              `<button
+                class="revoke"
+                onclick="revokeKey(${k.id})">
+                REVOKE
+              </button>`
+
+              :
+
+              "—"
+            }
+
+          </td>
+
+        </tr>
+
+      `).join("");
+
+  }
+
+
+  updateStats();
+
+}
+
+
+/* =========================
+   STATS
+========================= */
+
+function updateStats(){
+
+  document.getElementById("total").textContent =
+    keys.length;
+
+  document.getElementById("active").textContent =
+    keys.filter(k => k.status === "active").length;
+
+  document.getElementById("revoked").textContent =
+    keys.filter(k => k.status === "revoked").length;
+
+  document.getElementById("expired").textContent =
+    keys.filter(k => k.status === "expired").length;
+
+}
+
+
+/* =========================
+   REVOKE
+========================= */
+
+function revokeKey(id){
+
+  if(!confirm("Revoke this key?")) return;
+
+
+  const key =
+    keys.find(k => k.id === id);
+
+
+  if(key){
+
+    key.status = "revoked";
+
+    saveKeys();
+
+    renderKeys();
+
+  }
+
+}
+
+
+/* =========================
+   COPY
+========================= */
+
+async function copyKey(){
+
+  const key =
+    document.getElementById("newKey").textContent;
+
+  if(!key) return;
+
+
+  try{
+
+    await navigator.clipboard.writeText(key);
+
+    alert("Key copied!");
+
+  }catch{
+
+    alert("Copy failed. Please copy manually.");
+
+  }
+
+}
+
+
+/* =========================
+   FORMAT DATE
+========================= */
+
+function formatExpiry(timestamp){
+
+  if(!timestamp){
+
+    return "LIFETIME";
+
+  }
+
+  return new Date(timestamp)
+    .toLocaleString();
+
+}
+
+
+/* =========================
+   ESCAPE HTML
+========================= */
+
+function escapeHTML(text){
+
+  return String(text)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;")
+    .replaceAll('"',"&quot;")
+    .replaceAll("'","&#039;");
+
+}
+
+
+/* =========================
+   AUTO REFRESH
+========================= */
+
+setInterval(() => {
+
+  updateExpired();
+
+  renderKeys();
+
+},1000);
+
+
+/* INITIAL */
+
+renderKeys();
+
+</script>
+
+</body>
+</html>
+
+
+
+<!-- WINNER VAULT MODS -->
+<div style="
+  width:min(1100px,94%);
+  margin:0 auto 30px;
+  padding:20px;
+  text-align:center;
+  background:rgba(15,21,32,.92);
+  border:1px solid #273247;
+  border-radius:20px;
+  box-shadow:0 15px 50px rgba(0,0,0,.35);
+">
+
+  <div style="
+    font-size:18px;
+    font-weight:900;
+    letter-spacing:1px;
+    margin-bottom:8px;
+  ">
+    APP DEVELOPER
+  </div>
+
+  <div style="
+    color:#65e6bd;
+    font-size:20px;
+    font-weight:900;
+    margin-bottom:15px;
+  ">
+    WINNER VAULT MODS
+  </div>
+
+  <div style="
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    flex-wrap:wrap;
+  ">
+
+    <a
+      href="https://t.me/+herrih3Hheo5M2Vl"
+      target="_blank"
+      rel="noopener"
+      style="
+        text-decoration:none;
+        background:#65e6bd;
+        color:#06100d;
+        padding:12px 18px;
+        border-radius:11px;
+        font-weight:800;
+        display:inline-block;
+      "
+    >
+      📢 SUPPORT CHANNEL
+    </a>
+
+    <a
+      href="https://t.me/Ownerffgarena"
+      target="_blank"
+      rel="noopener"
+      style="
+        text-decoration:none;
+        background:#182333;
+        color:#fff;
+        padding:12px 18px;
+        border-radius:11px;
+        font-weight:800;
+        display:inline-block;
+      "
+    >
+      👤 DEVELOPER
+    </a>
+
+  </div>
+
+  <div style="
+    color:#778399;
+    font-size:12px;
+    margin-top:15px;
+  ">
+    Developer: t.me/Ownerffgarena
+  </div>
+
+</div>
